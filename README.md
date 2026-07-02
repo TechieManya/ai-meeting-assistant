@@ -46,7 +46,7 @@ An AI-powered meeting assistant that automatically records meetings, converts sp
 - Email report automation
 - Meeting dashboard
 - Meeting bot integration
-- Improvisions in Phase 2
+- Enhancements Planned for Phase 2
 
 ## Repository Structure
 
