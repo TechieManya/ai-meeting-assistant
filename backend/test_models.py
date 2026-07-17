@@ -8,7 +8,7 @@ for model in client.models.list():
 
 try:
     response = client.models.generate_content(
-        model="gemini-2.5-flash",  # Using a confirmed live model from your list
+        model="gemini-2.5-flash",  
         contents="Hello! Confirming connection."
     )
     print("\n✅ Success! Gemini Response:", response.text)
