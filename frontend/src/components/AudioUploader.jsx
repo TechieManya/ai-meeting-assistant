@@ -15,60 +15,93 @@ function AudioUploader() {
 
   const handleUpload = async () => {
     if (!file) return;
-
     setLoading(true);
     setError(null);
-
     try {
       const data = await transcribeAudio(file);
       setTranscript(data.transcript);
     } catch (err) {
       setError("Something went wrong. Check if your backend is running.");
-      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ maxWidth: "800px", margin: "40px auto", padding: "0 20px" }}>
-      <h1>AI Meeting Assistant</h1>
-      <p>Upload an audio file to generate a transcript with speaker labels.</p>
-
-      <div style={{ marginBottom: "20px" }}>
-        <input
-          type="file"
-          accept=".mp3,.wav"
-          onChange={handleFileChange}
-        />
+    <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+      <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+        <label style={{
+          padding: "10px 16px",
+          borderRadius: "8px",
+          border: "1px solid #2a2a3e",
+          backgroundColor: "#13131f",
+          color: "#a8a8c0",
+          fontSize: "13px",
+          cursor: "pointer",
+          whiteSpace: "nowrap",
+        }}>
+          {file ? file.name : "Choose File"}
+          <input
+            type="file"
+            accept=".mp3,.wav"
+            onChange={handleFileChange}
+            style={{ display: "none" }}
+          />
+        </label>
         <button
           onClick={handleUpload}
           disabled={!file || loading}
-          style={{ marginLeft: "10px" }}
+          style={{
+            padding: "10px 20px",
+            borderRadius: "8px",
+            border: "none",
+            background: !file || loading
+              ? "#2a2a3e"
+              : "linear-gradient(135deg, #6366f1, #8b5cf6)",
+            color: !file || loading ? "#6b6b8a" : "#fff",
+            fontSize: "14px",
+            fontWeight: "600",
+            cursor: !file || loading ? "not-allowed" : "pointer",
+          }}
         >
-          {loading ? "Processing..." : "Upload & Transcribe"}
+          {loading ? "Processing..." : "Transcribe"}
         </button>
       </div>
 
       {error && (
-        <p style={{ color: "red" }}>{error}</p>
+        <div style={{
+          padding: "10px 14px",
+          borderRadius: "8px",
+          backgroundColor: "#1f0f0f",
+          border: "1px solid #3f1f1f",
+          color: "#f87171",
+          fontSize: "13px",
+        }}>{error}</div>
       )}
 
       {transcript && (
-        <div>
-          <h2>Transcript</h2>
-          {transcript.map((segment, index) => (
-            <div
-              key={index}
-              style={{
-                marginBottom: "16px",
-                padding: "12px",
-                backgroundColor: "#f5f5f5",
-                borderRadius: "8px",
-              }}
-            >
-              <strong>{segment.speaker}</strong>
-              <p style={{ margin: "4px 0 0 0" }}>{segment.text}</p>
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "8px" }}>
+          {transcript.map((segment, i) => (
+            <div key={i} style={{
+              padding: "14px 16px",
+              borderRadius: "10px",
+              backgroundColor: "#13131f",
+              border: "1px solid #1e1e2e",
+              borderLeft: "3px solid #8b5cf6",
+            }}>
+              <div style={{
+                fontSize: "11px",
+                fontWeight: "700",
+                color: "#8b5cf6",
+                marginBottom: "6px",
+                textTransform: "uppercase",
+                letterSpacing: "0.5px",
+              }}>{segment.speaker}</div>
+              <div style={{
+                fontSize: "14px",
+                color: "#c8c8e0",
+                lineHeight: "1.6",
+              }}>{segment.text}</div>
             </div>
           ))}
         </div>
