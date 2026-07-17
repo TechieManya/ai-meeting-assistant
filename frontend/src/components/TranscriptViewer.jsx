@@ -17,7 +17,7 @@ function TranscriptViewer({ botId }) {
   useEffect(() => {
     if (!botId) return;
 
-    // Check immediately on load
+   
     checkTranscript();
 
     intervalRef.current = setInterval(checkTranscript, 5000);
@@ -34,14 +34,14 @@ function TranscriptViewer({ botId }) {
         setStatus("completed");
         clearInterval(intervalRef.current);
 
-        // Check if summary already exists for this meeting
+      
         try {
           const existingSummary = await getSummary(botId);
           if (existingSummary.status === "completed") {
             setSummary(existingSummary.summary);
           }
         } catch (err) {
-          // No summary yet — that's fine, show the button
+         
         }
       }
     } catch (err) {
