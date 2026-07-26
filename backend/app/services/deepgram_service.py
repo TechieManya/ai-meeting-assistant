@@ -47,7 +47,7 @@ def match_speaker_name(
         best = max(candidates, key=lambda e: e.get("start_time", 0))
         return best.get("speaker", fallback)
 
-    # No real match even with buffer — don't force a wrong guess
+  
     return fallback
 
 

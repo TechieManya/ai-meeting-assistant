@@ -12,7 +12,7 @@ def summarize_meeting(bot_id: str):
     Fetches transcript from MongoDB, sends to Groq, saves and returns summary.
     """
     
-    # Step 1 — Get transcript from MongoDB
+
     meeting = get_transcript_by_bot_id(bot_id)
     
     if not meeting:
@@ -29,7 +29,7 @@ def summarize_meeting(bot_id: str):
             detail="Transcript is empty, cannot generate summary"
         )
     
-    # Step 2 — Generate summary using Groq
+   
     try:
         summary = generate_summary(transcript)
     except Exception as e:
@@ -38,10 +38,10 @@ def summarize_meeting(bot_id: str):
             detail=f"Groq API error: {str(e)}"
         )
     
-    # Step 3 — Save summary to MongoDB
+
     save_summary(bot_id, summary)
     
-    # Step 4 — Return summary to React
+ 
     return {
         "bot_id": bot_id,
         "summary": summary
