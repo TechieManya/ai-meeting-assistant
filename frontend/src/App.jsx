@@ -1,137 +1,336 @@
-import { useState, useEffect } from "react";
-import AudioUploader from "./components/AudioUploader";
+import { useState, useEffect, useRef } from "react";
+
+import Sidebar from "./components/Sidebar";
+import Dashboard from "./components/Dashboard";
 import MeetingJoinForm from "./components/MeetingJoinForm";
-import TranscriptViewer from "./components/TranscriptViewer";
+import AuthScreen from "./components/AuthScreen";
 
-function App() {
-  const [botId, setBotId] = useState(() => {
-    return localStorage.getItem("active_bot_id") || null;
-  });
+import { getAllMeetings } from "./services/api";
+import { AuthProvider, useAuth } from "./AuthContext";
+import theme from "./theme";
 
-  const handleBotJoined = (id) => {
-    localStorage.setItem("active_bot_id", id);
-    setBotId(id);
+function AppShell() {
+  const { user, logout } = useAuth();
+
+  const [meetings, setMeetings] = useState([]);
+  const [selectedMeeting, setSelectedMeeting] = useState(null);
+  const [activeBotId, setActiveBotId] = useState(null);
+  const [mode, setMode] = useState("welcome");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [showJoinForm, setShowJoinForm] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    if (user) fetchHistory();
+  }, [user]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setProfileOpen(false);
+      }
+    }
+    if (profileOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [profileOpen]);
+
+  const fetchHistory = async () => {
+    try {
+      const data = await getAllMeetings();
+      const meetingsList = Array.isArray(data)
+        ? data
+        : data?.meetings || data?.data || [];
+      setMeetings(meetingsList);
+    } catch (err) {
+      console.error("Failed to fetch meeting history:", err);
+      setMeetings([]);
+    }
   };
 
-  const handleClear = () => {
-    localStorage.removeItem("active_bot_id");
-    setBotId(null);
+  const handleSelectMeeting = (meeting) => {
+    setSelectedMeeting(meeting);
+    setMode("history");
+    setShowJoinForm(false);
   };
+
+  const handleNewMeeting = () => {
+    setShowJoinForm(true);
+    setSelectedMeeting(null);
+    setMode("new");
+  };
+
+  const handleBotJoined = (botId) => {
+    setActiveBotId(botId);
+    setMode("live");
+    setShowJoinForm(false);
+  };
+
+  const handleTranscriptReady = () => {
+    fetchHistory();
+  };
+
+  if (!user) return <AuthScreen />;
+
+  const initials = user.name
+    ? user.name
+        .split(" ")
+        .map((w) => w[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
+    : "?";
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      backgroundColor: "#0a0a0f",
-      color: "#e8e8f0",
-      fontFamily: "'Inter', 'Segoe UI', sans-serif",
-    }}>
-      {/* Header */}
-      <div style={{
-        borderBottom: "1px solid #1e1e2e",
-        padding: "20px 40px",
-        display: "flex",
-        alignItems: "center",
-        gap: "12px",
-        backgroundColor: "#0d0d14",
-      }}>
-        <div style={{
-          width: "32px",
-          height: "32px",
-          borderRadius: "8px",
-          background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: "16px",
-        }}>🤖</div>
-        <div>
-          <div style={{ fontWeight: "700", fontSize: "16px" }}>
-            AI Meeting Assistant
-          </div>
-          <div style={{ fontSize: "12px", color: "#6b6b8a" }}>
-            Powered by Deepgram + Meeting BaaS
-          </div>
-        </div>
-        {/* Clear button — useful for starting a new meeting */}
-        {botId && (
-          <button
-            onClick={handleClear}
-            style={{
-              marginLeft: "auto",
-              padding: "6px 14px",
-              borderRadius: "6px",
-              border: "1px solid #2a2a3e",
-              backgroundColor: "transparent",
-              color: "#6b6b8a",
-              fontSize: "12px",
-              cursor: "pointer",
-            }}
-          >
-            New Meeting
-          </button>
-        )}
-      </div>
-
-      {/* Main content */}
-      <div style={{
-        maxWidth: "780px",
-        margin: "0 auto",
-        padding: "40px 20px",
+    <div
+      style={{
         display: "flex",
         flexDirection: "column",
-        gap: "24px",
-      }}>
-        <Section
-          label="LIVE MEETING"
-          title="Send Bot to Meeting"
-          description="Paste a Google Meet link. The bot joins, records, and transcribes automatically."
-        >
-          <MeetingJoinForm onBotJoined={handleBotJoined} />
-          {botId && <TranscriptViewer botId={botId} />}
-        </Section>
+        height: "100vh",
+        width: "100vw",
+        backgroundColor: theme.bg,
+        fontFamily:
+          '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+        overflow: "hidden",
+      }}
+    >
+      {/* HEADER */}
+      <header
+        style={{
+          padding: "14px 32px", // slightly more vertical breathing room
+          borderBottom: "1px solid #e2e8f0",
+          backgroundColor: "#ffffff",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "16px",
+          flexShrink: 0,
+        }}
+      >
+        {/* Left — Logo */}
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          {/* Padded logo container */}
+          <div
+            style={{
+              width: "40px",
+              height: "40px",
+              borderRadius: "10px",
+              backgroundColor: "#eeeffd",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "18px",
+              padding: "8px", // internal breathing room around the icon
+              boxSizing: "border-box",
+            }}
+          >
+            🤖
+          </div>
+          <div>
+            <h1
+              style={{
+                margin: 0,
+                fontSize: "17px",
+                fontWeight: 700,
+                color: "#4f46e5",
+                lineHeight: 1.2,
+              }}
+            >
+              Conferio
+            </h1>
+            <p
+              style={{
+                margin: "2px 0 0",
+                fontSize: "11px",
+                color: "#64748b",
+                fontWeight: 500,
+              }}
+            >
+              Your Pensieve for Meetings
+            </p>
+          </div>
+        </div>
 
-        <Section
-          label="AUDIO FILE"
-          title="Upload & Transcribe"
-          description="Upload an existing MP3 or WAV file to generate a transcript."
+        {/* Right — Welcome + Avatar */}
+        <div
+          ref={dropdownRef}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+            position: "relative",
+            paddingRight: "4px", // keeps avatar from touching viewport edge
+          }}
         >
-          <AudioUploader />
-        </Section>
+          <span
+            style={{
+              fontSize: "13px",
+              color: "#0f172a",
+              fontWeight: 700,
+            }}
+          >
+            Welcome, {user.name?.split(" ")[0]}
+          </span>
+
+          <button
+            onClick={() => setProfileOpen((o) => !o)}
+            title={user.name}
+            style={{
+              width: "36px",
+              height: "36px",
+              borderRadius: "50%",
+              backgroundColor: "#4f46e5",
+              color: "#ffffff",
+              fontSize: "12px",
+              fontWeight: 700,
+              border: "2px solid #e2e8f0",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              flexShrink: 0,
+            }}
+          >
+            {initials}
+          </button>
+
+          {profileOpen && (
+            <div
+              style={{
+                position: "absolute",
+                right: "4px",
+                top: "50px",
+                width: "240px",
+                backgroundColor: "#ffffff",
+                border: "1px solid #e2e8f0",
+                borderRadius: "12px",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.10)",
+                padding: "16px", // proper padding all around the card
+                zIndex: 50,
+                boxSizing: "border-box",
+              }}
+            >
+              {/* User info */}
+              <div style={{ marginBottom: "14px" }}>
+                <div
+                  style={{
+                    fontSize: "14px",
+                    fontWeight: 600,
+                    color: "#0f172a",
+                    marginBottom: "3px",
+                    lineHeight: 1.3,
+                  }}
+                >
+                  {user.name}
+                </div>
+                <div
+                  style={{
+                    fontSize: "12px",
+                    color: "#64748b",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {user.email}
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div
+                style={{
+                  height: "1px",
+                  backgroundColor: "#e2e8f0",
+                  margin: "0 0 14px",
+                }}
+              />
+
+              {/* Log out button */}
+              <button
+                onClick={logout}
+                style={{
+                  width: "100%",
+                  padding: "10px 0",
+                  borderRadius: "8px",
+                  border: "none",
+                  backgroundColor: "#fef2f2",
+                  color: "#dc2626",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  letterSpacing: "0.2px",
+                  transition: "background-color 0.15s ease",
+                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.backgroundColor = "#fee2e2")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.backgroundColor = "#fef2f2")
+                }
+              >
+                Log out
+              </button>
+            </div>
+          )}
+        </div>
+      </header>
+
+      {/* BODY */}
+      <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+        <Sidebar
+          meetings={meetings}
+          selectedMeeting={selectedMeeting}
+          activeBotId={activeBotId}
+          onSelectMeeting={handleSelectMeeting}
+          onNewMeeting={handleNewMeeting}
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+        />
+
+        <main
+          style={{
+            flex: 1,
+            height: "100%",
+            overflow: "hidden",
+            boxSizing: "border-box",
+          }}
+        >
+          {showJoinForm ? (
+            <div
+              style={{
+                padding: "32px 40px",
+                maxWidth: "1000px",
+                margin: "0 auto",
+                overflowY: "auto",
+                height: "100%",
+              }}
+            >
+              <MeetingJoinForm onBotJoined={handleBotJoined} />
+            </div>
+          ) : (
+            <Dashboard
+              mode={mode}
+              selectedMeeting={selectedMeeting}
+              activeBotId={activeBotId}
+              onTranscriptReady={handleTranscriptReady}
+              userName={user.name}
+            />
+          )}
+        </main>
       </div>
     </div>
   );
 }
 
-function Section({ label, title, description, children }) {
+function App() {
   return (
-    <div style={{
-      backgroundColor: "#0f0f1a",
-      border: "1px solid #1e1e2e",
-      borderRadius: "16px",
-      padding: "28px",
-    }}>
-      <div style={{
-        fontSize: "11px",
-        fontWeight: "600",
-        letterSpacing: "1.5px",
-        color: "#6366f1",
-        marginBottom: "8px",
-        textTransform: "uppercase",
-      }}>{label}</div>
-      <div style={{
-        fontSize: "20px",
-        fontWeight: "700",
-        letterSpacing: "-0.4px",
-        marginBottom: "6px",
-      }}>{title}</div>
-      <div style={{
-        fontSize: "13px",
-        color: "#6b6b8a",
-        marginBottom: "24px",
-        lineHeight: "1.5",
-      }}>{description}</div>
-      {children}
-    </div>
+    <AuthProvider>
+      <AppShell />
+    </AuthProvider>
   );
 }
 

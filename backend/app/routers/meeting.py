@@ -1,12 +1,19 @@
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
 from pydantic import BaseModel
 from typing import Optional, List
 import httpx
 import json
 
-from app.services.meeting_baas_service import send_bot
+from app.services.meeting_baas_service import send_bot, get_bot_data
 from app.services.deepgram_service import get_transcript
-from app.services.mongo_service import save_transcript, get_transcript_by_bot_id
+from app.services.mongo_service import (
+    save_transcript,
+    get_transcript_by_bot_id,
+    get_all_meetings,
+    create_pending_meeting,
+    get_meeting_owner,
+)
+from app.services.auth_service import get_current_user
 from app.config import NGROK_URL
 
 router = APIRouter()
@@ -55,7 +62,6 @@ def process_meeting(payload: CallbackPayload):
             lines = diar_response.text.strip().split("\n")
             diarization_data = [json.loads(line) for line in lines if line.strip()]
             print(f"=== DIARIZATION ENTRIES: {len(diarization_data)} ===")
-           
 
         participants_list = [
             p.name for p in payload.data.participants
@@ -85,16 +91,26 @@ def process_meeting(payload: CallbackPayload):
 # --- Endpoints ---
 
 @router.post("/join")
-def join_meeting(request: JoinMeetingRequest):
+def join_meeting(request: JoinMeetingRequest, current_user: dict = Depends(get_current_user)):
     callback_url = f"{NGROK_URL}/api/v1/meeting/callback"
     try:
         result = send_bot(
             meeting_url=request.meeting_url,
             callback_url=callback_url
         )
+        bot_id = result["bot_id"]
+
+        # Record ownership AND the original meeting URL immediately,
+        # before the Meeting BaaS callback ever arrives
+        create_pending_meeting(
+            bot_id=bot_id,
+            user_id=str(current_user["_id"]),
+            meeting_url=request.meeting_url,
+        )
+
         return {
             "message": "Bot is joining the meeting",
-            "bot_id": result["bot_id"]
+            "bot_id": bot_id
         }
     except Exception as e:
         raise HTTPException(
@@ -105,6 +121,9 @@ def join_meeting(request: JoinMeetingRequest):
 
 @router.post("/callback")
 def meeting_callback(payload: CallbackPayload, background_tasks: BackgroundTasks):
+    # Meeting BaaS calls this directly — there's no user logged in here.
+    # Ownership and meeting_url were already saved at /join time via
+    # create_pending_meeting, so save_transcript() below just fills in the rest.
     if payload.event != "bot.completed":
         return {"message": f"Event '{payload.event}' received, no action needed"}
 
@@ -113,10 +132,14 @@ def meeting_callback(payload: CallbackPayload, background_tasks: BackgroundTasks
 
 
 @router.get("/transcript/{bot_id}")
-def fetch_transcript(bot_id: str):
+def fetch_transcript(bot_id: str, current_user: dict = Depends(get_current_user)):
+    owner_id = get_meeting_owner(bot_id)
+    if owner_id and owner_id != str(current_user["_id"]):
+        raise HTTPException(status_code=403, detail="This meeting doesn't belong to you")
+
     result = get_transcript_by_bot_id(bot_id)
 
-    if not result:
+    if not result or not result.get("transcript"):
         return {"status": "pending"}
 
     return {
@@ -126,3 +149,30 @@ def fetch_transcript(bot_id: str):
         "audio_url": result.get("audio_url"),
         "transcript": result["transcript"]
     }
+
+
+@router.get("/all")
+def get_all_meetings_list(current_user: dict = Depends(get_current_user)):
+    """
+    Returns all meetings for the sidebar, scoped to the logged-in user only.
+    """
+    meetings = get_all_meetings(user_id=str(current_user["_id"]))
+    return {"meetings": meetings}
+
+
+@router.get("/audio/{bot_id}")
+def fetch_fresh_audio(bot_id: str, current_user: dict = Depends(get_current_user)):
+    """
+    Returns a freshly-signed audio URL for a given bot_id.
+    Signed URLs from Meeting BaaS expire after a few hours, so this is
+    called on-demand whenever a meeting is opened in the UI.
+    """
+    owner_id = get_meeting_owner(bot_id)
+    if owner_id and owner_id != str(current_user["_id"]):
+        raise HTTPException(status_code=403, detail="This meeting doesn't belong to you")
+
+    try:
+        data = get_bot_data(bot_id)
+        return {"audio_url": data.get("audio")}
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Could not fetch audio: {str(e)}")

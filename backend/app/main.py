@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import transcription , meeting , summary
+from app.routers import auth
 
 app = FastAPI(
     title="AI Meeting Assistant",
@@ -17,6 +18,7 @@ app.add_middleware(
 app.include_router(transcription.router, prefix="/api/v1", tags=["Transcription"])
 app.include_router(meeting.router, prefix="/api/v1/meeting", tags=["Meeting"])
 app.include_router(summary.router, prefix="/api/v1/summary", tags=["Summary"])
+app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 
 
 @app.get("/")

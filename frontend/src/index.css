@@ -5,6 +5,135 @@
 }
 
 body {
-  background-color: #0a0a0f;
-  color: #e8e8f0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+  background-color: #f8fafc;
+  color: #0f172a;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Global scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Custom scrollbars for scrollable panels */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Audio Player */
+.rhap_container {
+  background-color: #ffffff !important;
+  box-shadow: none !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 12px !important;
+  padding: 10px 16px !important;
+}
+
+.rhap_container > div {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 14px;
+}
+
+.rhap_main-controls-button {
+  color: #ffffff !important;
+  background-color: #4f46e5 !important;
+  border-radius: 50% !important;
+  width: 36px !important;
+  height: 36px !important;
+  transition: background-color 0.15s;
+}
+
+.rhap_main-controls-button:hover {
+  background-color: #4338ca !important;
+}
+
+.rhap_progress-bar {
+  background-color: #e2e8f0 !important;
+  height: 4px !important;
+  border-radius: 999px !important;
+}
+
+.rhap_progress-filled {
+  background-color: #4f46e5 !important;
+  border-radius: 999px !important;
+}
+
+.rhap_progress-indicator {
+  background-color: #4f46e5 !important;
+  width: 12px !important;
+  height: 12px !important;
+  box-shadow: 0 0 0 2px #ffffff !important;
+  top: -4px !important;
+}
+
+.rhap_download-progress {
+  background-color: #f1f5f9 !important;
+}
+
+.rhap_time {
+  color: #64748b !important;
+  font-size: 11px !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.rhap_volume-button {
+  color: #94a3b8 !important;
+}
+
+.rhap_volume-bar-area {
+  width: 60px !important;
+}
+
+.rhap_volume-bar {
+  background-color: #e2e8f0 !important;
+  height: 3px !important;
+  border-radius: 999px !important;
+}
+
+.rhap_volume-indicator {
+  background-color: #4f46e5 !important;
+  width: 10px !important;
+  height: 10px !important;
+  box-shadow: none !important;
+}
+
+.rhap_additional-controls .rhap_repeat-button {
+  display: none !important;
 }

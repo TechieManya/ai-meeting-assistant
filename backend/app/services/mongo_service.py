@@ -1,21 +1,65 @@
 from pymongo import MongoClient
+from datetime import datetime, timezone
+from bson import ObjectId
 from app.config import MONGODB_URL
 
-# Create one MongoDB connection
 client = MongoClient(MONGODB_URL)
-
-# Database
 db = client["meeting_assistant"]
 
-# Collection
 transcripts_collection = db["transcripts"]
+users_collection = db["users"]
+
+
+# --- Users ---
+
+def create_user(email: str, hashed_password: str, name: str):
+    result = users_collection.insert_one({
+        "email": email.lower().strip(),
+        "hashed_password": hashed_password,
+        "name": name,
+        "created_at": datetime.now(timezone.utc),
+    })
+    return str(result.inserted_id)
+
+
+def get_user_by_email(email: str):
+    return users_collection.find_one({"email": email.lower().strip()})
+
+
+def get_user_by_id(user_id: str):
+    try:
+        return users_collection.find_one({"_id": ObjectId(user_id)})
+    except Exception:
+        return None
+
+
+# --- Meetings ---
+
+def create_pending_meeting(bot_id: str, user_id: str, meeting_url: str = None):
+    """
+    Called the moment a bot is sent to a meeting, so ownership and the
+    original Google Meet URL exist before the Meeting BaaS callback arrives later.
+    """
+    transcripts_collection.update_one(
+        {"bot_id": bot_id},
+        {
+            "$set": {
+                "bot_id": bot_id,
+                "user_id": user_id,
+                "meeting_url": meeting_url,
+                "status": "pending",
+            },
+            "$setOnInsert": {
+                "created_at": datetime.now(timezone.utc),
+                "transcript": [],
+                "participants": [],
+            },
+        },
+        upsert=True,
+    )
 
 
 def save_transcript(bot_id: str, transcript: list, participants: list, audio_url: str = None):
-    """
-    Save transcript in MongoDB.
-    """
-
     transcripts_collection.update_one(
         {"bot_id": bot_id},
         {
@@ -24,30 +68,48 @@ def save_transcript(bot_id: str, transcript: list, participants: list, audio_url
                 "transcript": transcript,
                 "participants": participants,
                 "audio_url": audio_url,
-                "status": "completed"
-            }
+                "status": "completed",
+            },
+            "$setOnInsert": {
+                "created_at": datetime.now(timezone.utc),
+            },
         },
-        upsert=True
+        upsert=True,
     )
 
 
 def get_transcript_by_bot_id(bot_id: str):
-    """
-    Fetch transcript by bot_id.
-    """
+    return transcripts_collection.find_one({"bot_id": bot_id}, {"_id": 0})
 
-    document = transcripts_collection.find_one(
-        {"bot_id": bot_id},
-        {"_id": 0}
-    )
 
-    return document
+def get_meeting_owner(bot_id: str):
+    doc = transcripts_collection.find_one({"bot_id": bot_id}, {"user_id": 1})
+    return doc.get("user_id") if doc else None
+
 
 def save_summary(bot_id: str, summary: dict):
-    """
-    Saves AI-generated summary to existing meeting document.
-    """
     transcripts_collection.update_one(
         {"bot_id": bot_id},
         {"$set": {"summary": summary}}
     )
+
+
+def get_all_meetings(user_id: str):
+    documents = list(transcripts_collection.find(
+        {"user_id": user_id},
+        {
+            "bot_id": 1,
+            "meeting_url": 1,
+            "participants": 1,
+            "status": 1,
+            "created_at": 1,
+            "audio_url": 1,
+            "transcript": 1,
+            "summary": 1,
+        }
+    ).sort("_id", -1))
+
+    for doc in documents:
+        doc["_id"] = str(doc["_id"])
+
+    return documents

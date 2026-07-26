@@ -37,3 +37,15 @@ def send_bot(meeting_url: str, callback_url: str) -> dict:
     response.raise_for_status()
     data = response.json()
     return data["data"]
+
+def get_bot_data(bot_id: str) -> dict:
+    """
+    Fetches current bot data from Meeting BaaS, including a freshly-signed audio URL.
+    """
+    headers = {"x-meeting-baas-api-key": MEETING_BAAS_API_KEY}
+
+    with httpx.Client() as client:
+        response = client.get(f"{MEETING_BAAS_URL}/bots/{bot_id}", headers=headers)
+
+    response.raise_for_status()
+    return response.json()["data"]
