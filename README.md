@@ -80,44 +80,7 @@ React dashboard displays transcript + summary + synced audio player
 ### ⬜ Phase 7 — Advanced Dashboard (upcoming)
 
 
-## Project Structure
 
-
-conferio/
-├── backend/
-│   ├── app/
-│   │   ├── main.py                    # FastAPI entry point, CORS, routers
-│   │   ├── config.py                  # Environment variables
-│   │   ├── routers/
-│   │   │   ├── auth.py                # Register, login endpoints
-│   │   │   ├── meeting.py             # Bot join, callback, transcript fetch
-│   │   │   └── summary.py             # Summary generate + fetch
-│   │   └── services/
-│   │       ├── deepgram_service.py    # STT + diarization + timestamps
-│   │       ├── meeting_baas_service.py # Meeting BaaS API calls
-│   │       ├── groq_service.py        # LLM summarization
-│   │       └── mongo_service.py       # All MongoDB operations
-│   ├── requirements.txt
-│   └── .env.example
-└── frontend/
-    └── src/
-        ├── App.jsx                    # Root shell + auth + layout
-        ├── AuthContext.jsx            # Auth state management
-        ├── components/
-        │   ├── AuthScreen.jsx         # Login / signup UI
-        │   ├── Sidebar.jsx            # Meeting history list
-        │   ├── MeetingCard.jsx        # Individual meeting in sidebar
-        │   ├── Dashboard.jsx          # Main content area
-        │   ├── MeetingHeader.jsx      # Meeting info bar
-        │   ├── SummaryPanel.jsx       # AI summary display
-        │   ├── TranscriptPanel.jsx    # Speaker segments + timestamps
-        │   ├── AudioPlayerPanel.jsx   # Audio player
-        │   └── MeetingJoinForm.jsx    # New meeting input
-        └── services/
-            └── api.js                 # All axios calls to backend
-
-
----
 
 ## Local Development Setup
 
