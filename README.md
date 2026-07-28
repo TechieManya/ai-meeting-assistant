@@ -1,89 +1,178 @@
-# AI Meeting Assistant
 
-An AI-powered meeting assistant that automatically joins meetings, records audio, transcribes speech with speaker identification, generates AI summaries, and displays everything in a React dashboard.
+# Conferio — AI Meeting Assistant
 
-## Live Demo Flow
-1. User pastes a Google Meet link
-2. Meeting BaaS bot joins and records the meeting
-3. Meeting ends → callback hits FastAPI backend
-4. Audio sent to Deepgram for transcription + speaker diarization
-5. Transcript saved to MongoDB
-6. Groq LLM generates meeting summary
-7. React displays transcript + summary + audio player with sync
+> Your Pensieve for Meetings
+
+An AI-powered meeting assistant that automatically joins Google Meet calls, records audio, transcribes speech with speaker identification, generates AI summaries, and displays everything in a professional React dashboard.
+
+🌐 **Live App:** [conferio.vercel.app](https://conferio.vercel.app)
+📡 **API:** [conferio-backend-s38i.onrender.com](https://conferio-backend-s38i.onrender.com)
+📖 **API Docs:** [conferio-backend-s38i.onrender.com/docs](https://conferio-backend-s38i.onrender.com/docs)
+
+## How It Works
+
+
+User pastes Google Meet link
+        ↓
+Meeting BaaS bot joins and records the meeting
+        ↓
+Meeting ends → callback hits FastAPI backend
+        ↓
+Audio downloaded and sent to Deepgram (STT + diarization)
+        ↓
+Transcript saved to MongoDB with speaker names + timestamps
+        ↓
+Groq LLM generates meeting summary
+        ↓
+React dashboard displays transcript + summary + synced audio player
+
 
 ## Tech Stack
 
-### Frontend
-- React + Vite
-- Axios
+| Layer | Technology |
+|---|---|
+| Frontend | React + Vite, deployed on Vercel |
+| Backend | FastAPI (Python) + uvicorn, deployed on Render |
+| Database | MongoDB Atlas |
+| Meeting Bot | Meeting BaaS |
+| Speech-to-Text | Deepgram (nova-2 model) |
+| AI Summarization | Groq API — LLaMA 3.1 8B |
+| Auth | JWT + bcrypt (passlib) |
 
-### Backend
-- FastAPI (Python)
-- uvicorn
 
-### AI & APIs
-- Deepgram (Speech-to-Text + Speaker Diarization)
-- Meeting BaaS (Meeting Bot)
-- Groq / LLaMA 3.1 (AI Summarization)
-
-### Database
-- MongoDB Atlas
-
-### Infrastructure
-- ngrok (local development tunneling)
-
-## Development Progress
+## Features
 
 ### ✅ Phase 1 — Meeting Bot Integration
 - Meeting BaaS bot joins Google Meet automatically
 - Records full meeting audio
 - Sends callback to FastAPI when meeting ends
-- ngrok tunnel for local development
 
 ### ✅ Phase 2 — Speech-to-Text + Diarization
-- Deepgram nova-2 model for transcription
-- Speaker diarization with real participant names
+- Deepgram nova-2 for transcription
+- Speaker diarization with real participant names (not Speaker 0/1)
 - Timestamps on every transcript segment
-- Audio player with transcript sync (YouTube-style)
+- Audio player with YouTube-style transcript sync
 - Sentence breaks for readability
 - Manual audio file upload also supported
-- Transcript + audio URL stored in MongoDB
 
 ### ✅ Phase 3 — AI Summarization
-- Groq API with LLaMA 3.1 8B model
-- Generates: Overview, Key Points, Action Items
+- Groq API with LLaMA 3.1 8B
+- Generates: Executive Summary, Key Points, Action Items
 - Summary stored in MongoDB alongside transcript
-- On-demand generation with "Generate Summary" button
+- On-demand generation with Regenerate button
 
-### 🚧 Phase 4 — Dashboard UI (In Progress)
-- Meeting history sidebar
-- Professional SaaS-style layout
-- Improved audio player
+### ✅ Phase 4 — Dashboard + Auth
+- Full authentication (signup, login, JWT sessions)
+- Per-user meeting isolation (each user sees only their meetings)
+- Meeting history sidebar (ChatGPT/WhatsApp style)
+- Professional SaaS UI — Slate + Indigo theme
+- Chat-bubble transcript with live playback sync
+- Collapsible sidebar
+- Audio player with fresh signed URL on every open
 
-### ⬜ Phase 5 — Action Items & Email Reports
-### ⬜ Phase 6 — Full Dashboard
+### ✅ Phase 5 — Deployment
+- Backend deployed on Render (persistent process for background tasks)
+- Frontend deployed on Vercel (auto-detected Vite, global CDN)
+- Automatic CI/CD — push to GitHub → both platforms redeploy automatically
+- All secrets managed via environment variables, nothing in source control
 
-## Setup
+### ⬜ Phase 6 — Action Items & Email Reports (upcoming)
+### ⬜ Phase 7 — Advanced Dashboard (upcoming)
+
+
+## Project Structure
+
+
+conferio/
+├── backend/
+│   ├── app/
+│   │   ├── main.py                    # FastAPI entry point, CORS, routers
+│   │   ├── config.py                  # Environment variables
+│   │   ├── routers/
+│   │   │   ├── auth.py                # Register, login endpoints
+│   │   │   ├── meeting.py             # Bot join, callback, transcript fetch
+│   │   │   └── summary.py             # Summary generate + fetch
+│   │   └── services/
+│   │       ├── deepgram_service.py    # STT + diarization + timestamps
+│   │       ├── meeting_baas_service.py # Meeting BaaS API calls
+│   │       ├── groq_service.py        # LLM summarization
+│   │       └── mongo_service.py       # All MongoDB operations
+│   ├── requirements.txt
+│   └── .env.example
+└── frontend/
+    └── src/
+        ├── App.jsx                    # Root shell + auth + layout
+        ├── AuthContext.jsx            # Auth state management
+        ├── components/
+        │   ├── AuthScreen.jsx         # Login / signup UI
+        │   ├── Sidebar.jsx            # Meeting history list
+        │   ├── MeetingCard.jsx        # Individual meeting in sidebar
+        │   ├── Dashboard.jsx          # Main content area
+        │   ├── MeetingHeader.jsx      # Meeting info bar
+        │   ├── SummaryPanel.jsx       # AI summary display
+        │   ├── TranscriptPanel.jsx    # Speaker segments + timestamps
+        │   ├── AudioPlayerPanel.jsx   # Audio player
+        │   └── MeetingJoinForm.jsx    # New meeting input
+        └── services/
+            └── api.js                 # All axios calls to backend
+
+
+---
+
+## Local Development Setup
+
+### Prerequisites
+- Python 3.11.9
+- Node.js 18+
+- MongoDB Atlas account
+- API keys for: Deepgram, Meeting BaaS, Groq
 
 ### Backend
-```bash
+
+bash
 cd backend
 python -m venv venv
-venv\Scripts\activate  # Windows
+
+# Windows
+venv\Scripts\activate
+# Mac/Linux
+source venv/bin/activate
+
 pip install -r requirements.txt
 uvicorn app.main:app --reload
-```
+
 
 ### Frontend
-```bash
+
+bash
 cd frontend
 npm install
 npm run dev
-```
+
 
 ### Environment Variables
-Copy `.env.example` to `.env` and fill in:  DEEPGRAM_API_KEY=
+
+Copy `backend/.env.example` to `backend/.env` and fill in:
+
+DEEPGRAM_API_KEY=
 MEETING_BAAS_API_KEY=
-NGROK_URL=
 MONGODB_URL=
 GROQ_API_KEY=
+JWT_SECRET_KEY=
+NGROK_URL=        # your ngrok public URL for local dev
+
+
+## Deployment
+
+| Platform | Service | URL |
+|---|---|---|
+| Vercel | Frontend | conferio.vercel.app |
+| Render | Backend | conferio-backend-s38i.onrender.com |
+| MongoDB Atlas | Database | cloud-hosted |
+
+Both platforms are connected to this GitHub repo. Every push to `main` triggers an automatic redeploy on both Vercel and Render — no manual steps needed.
+
+## Mentor
+**Miles** — Senior Engineer
+
+Developed as part of a B.Tech AI-ML summer internship project (3rd year, Northcap University).
