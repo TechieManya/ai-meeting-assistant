@@ -71,4 +71,9 @@ export const getFreshAudioUrl = async (botId) => {
   return response.data;
 };
 
+export const sendMeetingReport = async (botId) => {
+  const response = await apiClient.post(`/api/v1/meeting/${botId}/send-report`);
+  return response.data;
+};
+
 export const getMeetingHistory = getAllMeetings;

@@ -227,6 +227,7 @@ function Dashboard({ mode, selectedMeeting, activeBotId, onTranscriptReady, user
             summary={summary}
             summaryLoading={summaryLoading}
             onGenerate={handleGenerateSummary}
+            botId={currentBotId}
           />
         </div>
 
