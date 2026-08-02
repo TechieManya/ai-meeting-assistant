@@ -11,4 +11,6 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "dev-secret-change-this-in-production")
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
+RESEND_API_KEY = os.getenv("RESEND_API_KEY")
+EMAIL_FROM = os.getenv("EMAIL_FROM", "Conferio <onboarding@resend.dev>")
 
