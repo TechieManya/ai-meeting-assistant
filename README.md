@@ -76,7 +76,7 @@ React dashboard displays transcript + summary + synced audio player
 - Automatic CI/CD — push to GitHub → both platforms redeploy automatically
 - All secrets managed via environment variables, nothing in source control
 
-### ⬜ Phase 6 — Action Items & Email Reports (upcoming)
+###  ✅ Phase 6 — Action Items & Email Reports (upcoming)
 ### ⬜ Phase 7 — Advanced Dashboard (upcoming)
 
 
