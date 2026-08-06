@@ -1,7 +1,7 @@
-import resend
-from app.config import RESEND_API_KEY, EMAIL_FROM
+import httpx
+from app.config import EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, EMAILJS_PUBLIC_KEY, EMAILJS_PRIVATE_KEY
 
-resend.api_key = RESEND_API_KEY
+EMAILJS_API_URL = "https://api.emailjs.com/api/v1.0/email/send"
 
 
 def build_summary_email_html(meeting_title: str, meeting_date: str, participants: list, summary: dict) -> str:
@@ -69,21 +69,51 @@ def build_summary_email_html(meeting_title: str, meeting_date: str, participants
     """
 
 
-def send_meeting_summary_email(to_email: str, meeting_title: str, meeting_date: str, participants: list, summary: dict):
-    """
-    Sends the meeting summary email. Any failure here is caught and logged —
-    this must never crash the meeting-processing background task.
-    """
+def send_meeting_summary_email(
+    to_email: str,
+    meeting_title: str,
+    meeting_date: str,
+    participants: list,
+    summary: dict,
+):
     try:
-        html = build_summary_email_html(meeting_title, meeting_date, participants, summary)
-        result = resend.Emails.send({
-            "from": EMAIL_FROM,
-            "to": [to_email],
-            "subject": f"Meeting Summary: {meeting_title}",
-            "html": html,
-        })
-        print(f"=== EMAIL SENT: {to_email} (id: {result.get('id')}) ===")
-        return result
+        participants_str = ", ".join(participants) if participants else "No participants"
+
+        key_points = "\n".join(
+            [f"• {p}" for p in summary.get("key_points", [])]
+        ) or "No key points generated."
+
+        action_items = "\n".join(
+            [f"• {a}" for a in summary.get("action_items", [])]
+        ) or "No action items generated."
+
+        payload = {
+            "service_id": EMAILJS_SERVICE_ID,
+            "template_id": EMAILJS_TEMPLATE_ID,
+            "user_id": EMAILJS_PUBLIC_KEY,
+            "accessToken": EMAILJS_PRIVATE_KEY,
+            "template_params": {
+                "to_email": to_email,
+                "subject": f"Meeting Summary: {meeting_title}",
+                "meeting_title": meeting_title,
+                "meeting_date": meeting_date,
+                "participants": participants_str,
+                "summary": summary.get("summary", ""),
+                "key_points": key_points,
+                "action_items": action_items,
+            },
+        }
+
+        response = httpx.post(
+            EMAILJS_API_URL,
+            json=payload,
+            timeout=30,
+        )
+        response.raise_for_status()
+
+        print(f"=== EMAIL SENT via EmailJS: {to_email} ===")
+        return {"status": "sent"}
+
     except Exception as e:
-        print(f"=== EMAIL FAILED for {to_email}: {e} ===")
+        print(f"=== EMAIL FAILED: {e} ===")
         return None
