@@ -1,6 +1,8 @@
 import axios from "axios";
 
-const BASE_URL = "https://conferio-backend-s38i.onrender.com";
+const BASE_URL  = "https://conferio-backend-s38i.onrender.com"
+
+;
 
 const apiClient = axios.create({ baseURL: BASE_URL });
 
@@ -67,8 +69,20 @@ export const getAllMeetings = async () => {
 };
 
 export const getFreshAudioUrl = async (botId) => {
-  const response = await apiClient.get(`/api/v1/meeting/audio/${botId}`);
-  return response.data;
+  const response = await apiClient.get(`/api/v1/meeting/audio/${botId}`, {
+    responseType: "blob",
+  });
+
+  // Handle the legacy fallback case (old meetings, pre-permanent-storage,
+  // where the backend can only return a temporary Meeting BaaS link as JSON)
+  if (response.headers["content-type"]?.includes("application/json")) {
+    const text = await response.data.text();
+    const parsed = JSON.parse(text);
+    return { audio_url: parsed.legacy_redirect };
+  }
+
+  const blobUrl = URL.createObjectURL(response.data);
+  return { audio_url: blobUrl };
 };
 
 export const sendMeetingReport = async (botId) => {

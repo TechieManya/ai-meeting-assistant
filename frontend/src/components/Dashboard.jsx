@@ -109,12 +109,27 @@ function Dashboard({ mode, selectedMeeting, activeBotId, onTranscriptReady, user
       setStatus("completed");
       setCurrentTime(0);
 
+      let cancelled = false;
+      let currentBlobUrl = null;
+
       getFreshAudioUrl(selectedMeeting.bot_id)
-        .then((data) => setAudioUrl(data.audio_url))
+        .then((data) => {
+          if (cancelled) return;
+          currentBlobUrl = data.audio_url;
+          setAudioUrl(data.audio_url);
+        })
         .catch((err) => {
+          if (cancelled) return;
           console.error("Audio refresh failed:", err);
           setAudioUrl(null);
         });
+
+      return () => {
+        cancelled = true;
+        if (currentBlobUrl && currentBlobUrl.startsWith("blob:")) {
+          URL.revokeObjectURL(currentBlobUrl);
+        }
+      };
     }
   }, [selectedMeeting, mode]);
 
@@ -176,6 +191,7 @@ function Dashboard({ mode, selectedMeeting, activeBotId, onTranscriptReady, user
         height: "100%", gap: "16px",
         backgroundColor: "#f8fafc",
       }}>
+        
         <div style={{
           width: "10px", height: "10px",
           borderRadius: "50%",
@@ -262,7 +278,7 @@ function Dashboard({ mode, selectedMeeting, activeBotId, onTranscriptReady, user
               padding: "16px 20px",
               boxSizing: "border-box",
             }}>
-              <AudioPlayerPanel
+              <AudioPlayerPanel 
                 audioUrl={audioUrl}
                 onTimeUpdate={setCurrentTime}
               />
