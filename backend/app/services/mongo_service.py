@@ -1,6 +1,7 @@
 from pymongo import MongoClient
 from datetime import datetime, timezone
 from bson import ObjectId
+from gridfs import GridFS
 from app.config import MONGODB_URL
 
 client = MongoClient(MONGODB_URL)
@@ -8,6 +9,7 @@ db = client["meeting_assistant"]
 
 transcripts_collection = db["transcripts"]
 users_collection = db["users"]
+audio_fs = GridFS(db, collection="audio_files")
 
 
 # --- Users ---
@@ -113,3 +115,25 @@ def get_all_meetings(user_id: str):
         doc["_id"] = str(doc["_id"])
 
     return documents
+
+
+# --- Permanent audio storage (GridFS) ---
+
+def save_audio_file(bot_id: str, audio_bytes: bytes):
+    """
+    Permanently stores the meeting's audio in MongoDB itself,
+    so playback no longer depends on Meeting BaaS's retention window.
+    """
+    existing = audio_fs.find({"filename": bot_id})
+    for f in existing:
+        audio_fs.delete(f._id)
+    audio_fs.put(audio_bytes, filename=bot_id, content_type="audio/mpeg")
+
+
+def get_audio_file(bot_id: str):
+    """
+    Returns the permanently-stored audio bytes for a meeting, or None
+    if this meeting was processed before this fix existed.
+    """
+    file = audio_fs.find_one({"filename": bot_id})
+    return file.read() if file else None

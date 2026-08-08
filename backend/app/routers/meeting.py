@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends, Response
 from pydantic import BaseModel
 from typing import Optional, List
 import httpx
@@ -17,9 +17,11 @@ from app.services.mongo_service import (
     get_meeting_owner,
     get_user_by_id,
     save_summary,
+    save_audio_file,
+    get_audio_file,
 )
 from app.services.auth_service import get_current_user
-from app.config import NGROK_URL
+from app.config import NGROK_URL, FRONTEND_URL
 
 router = APIRouter()
 
@@ -89,6 +91,9 @@ def process_meeting(payload: CallbackPayload):
         )
         print(f"=== TRANSCRIPT SAVED: {payload.data.bot_id} ===")
 
+        save_audio_file(payload.data.bot_id, audio_bytes)
+        print(f"=== AUDIO PERMANENTLY STORED: {payload.data.bot_id} ===")
+
         # --- Auto-generate summary + send email notification ---
         try:
             owner_id = get_meeting_owner(payload.data.bot_id)
@@ -101,6 +106,7 @@ def process_meeting(payload: CallbackPayload):
 
                 meeting_title = f"Meeting · {payload.data.bot_id[:8].upper()}"
                 meeting_date = datetime.now(timezone.utc).strftime("%d %b %Y, %I:%M %p UTC")
+                meeting_link = f"{FRONTEND_URL}/meeting/{payload.data.bot_id}"
 
                 send_meeting_summary_email(
                     to_email=user["email"],
@@ -108,6 +114,7 @@ def process_meeting(payload: CallbackPayload):
                     meeting_date=meeting_date,
                     participants=participants_list,
                     summary=summary,
+                    meeting_link=meeting_link,
                 )
             else:
                 print(f"=== NO OWNER/EMAIL FOUND FOR {payload.data.bot_id}, SKIPPING EMAIL ===")
@@ -185,14 +192,24 @@ def get_all_meetings_list(current_user: dict = Depends(get_current_user)):
 
 
 @router.get("/audio/{bot_id}")
-def fetch_fresh_audio(bot_id: str, current_user: dict = Depends(get_current_user)):
+def fetch_audio(bot_id: str, current_user: dict = Depends(get_current_user)):
     owner_id = get_meeting_owner(bot_id)
     if owner_id and owner_id != str(current_user["_id"]):
         raise HTTPException(status_code=403, detail="This meeting doesn't belong to you")
 
+    audio_bytes = get_audio_file(bot_id)
+    if audio_bytes:
+        return Response(content=audio_bytes, media_type="audio/mpeg")
+
+    # Fallback for meetings processed before permanent storage existed
     try:
         data = get_bot_data(bot_id)
-        return {"audio_url": data.get("audio")}
+        fresh_url = data.get("audio")
+        if not fresh_url:
+            raise HTTPException(status_code=404, detail="Audio no longer available for this meeting")
+        return {"legacy_redirect": fresh_url}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Could not fetch audio: {str(e)}")
 
@@ -217,6 +234,7 @@ def send_meeting_report(bot_id: str, current_user: dict = Depends(get_current_us
     meeting_title = f"Meeting · {bot_id[:8].upper()}"
     created_at = meeting.get("created_at")
     meeting_date = created_at.strftime("%d %b %Y, %I:%M %p UTC") if created_at else "Date unavailable"
+    meeting_link = f"{FRONTEND_URL}/meeting/{bot_id}"
 
     result = send_meeting_summary_email(
         to_email=current_user["email"],
@@ -224,6 +242,7 @@ def send_meeting_report(bot_id: str, current_user: dict = Depends(get_current_us
         meeting_date=meeting_date,
         participants=meeting.get("participants", []),
         summary=meeting["summary"],
+        meeting_link=meeting_link,
     )
 
     if result is None:
