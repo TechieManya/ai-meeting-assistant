@@ -75,6 +75,7 @@ def send_meeting_summary_email(
     meeting_date: str,
     participants: list,
     summary: dict,
+    meeting_link: str = "",
 ):
     try:
         participants_str = ", ".join(participants) if participants else "No participants"
@@ -101,6 +102,7 @@ def send_meeting_summary_email(
                 "summary": summary.get("summary", ""),
                 "key_points": key_points,
                 "action_items": action_items,
+                "meeting_link": meeting_link,
             },
         }
 
