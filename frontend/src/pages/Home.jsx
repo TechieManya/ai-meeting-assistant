@@ -1,10 +1,18 @@
 import { Link } from "react-router-dom";
 import {
-  Mic, FileText, Users, ListChecks, Search, PlayCircle,
-  ArrowRight, Menu, X, CheckSquare, Square, Play
+  Mic,
+  FileText,
+  Users,
+  ListChecks,
+  Search,
+  PlayCircle,
+  ArrowRight,
+  Menu,
+  X
 } from "lucide-react";
 import { useState } from "react";
 import theme from "../theme";
+import dashboardPreview from "../assets/dashboard-preview.png";
 
 const features = [
   { icon: Mic, title: "Auto Transcription", desc: "Every word captured automatically the moment your meeting starts." },
@@ -104,75 +112,31 @@ function Hero() {
 
 function DashboardMockup() {
   return (
-    <section style={{ padding: "20px 24px 80px", display: "flex", justifyContent: "center" }}>
-      <div style={{
-        maxWidth: "1000px", width: "100%", borderRadius: "16px", overflow: "hidden",
-        border: `1px solid ${theme.border}`, boxShadow: "0 24px 64px rgba(79,70,229,0.12)",
-        display: "flex", backgroundColor: theme.surface,
-      }}>
-        {/* Sidebar */}
-        <div style={{ width: "180px", borderRight: `1px solid ${theme.border}`, padding: "14px" }}>
-          <div style={{
-            padding: "9px", borderRadius: "8px", backgroundColor: theme.accent, color: "#fff",
-            fontSize: "12px", fontWeight: 600, textAlign: "center", marginBottom: "14px",
-          }}>+ New Meeting</div>
-          {["ept-hbbu-spf", "kta-vfde-gyr", "yxj-cptz-vbs"].map((id, i) => (
-            <div key={id} style={{
-              padding: "8px", borderRadius: "6px", marginBottom: "4px",
-              backgroundColor: i === 0 ? theme.accentSoft : "transparent",
-            }}>
-              <div style={{ fontSize: "11px", fontWeight: 600, color: theme.textPrimary }}>Meeting · {id}</div>
-              <div style={{ fontSize: "9px", color: theme.textMuted }}>Manya, Vedika</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Summary */}
-        <div style={{ flex: 1, padding: "16px", borderRight: `1px solid ${theme.border}` }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-            <span style={{ fontSize: "11px", fontWeight: 700, color: theme.accent, textTransform: "uppercase" }}>AI Summary</span>
-            <span style={{ fontSize: "10px", padding: "4px 10px", borderRadius: "999px", border: `1px solid ${theme.border}` }}>Regenerate</span>
-          </div>
-          <div style={{ backgroundColor: theme.accentSoft, borderRadius: "8px", padding: "10px", marginBottom: "10px" }}>
-            <div style={{ fontSize: "10px", fontWeight: 700, color: theme.accent, marginBottom: "4px" }}>EXECUTIVE SUMMARY</div>
-            <div style={{ fontSize: "10px", color: theme.textPrimary, lineHeight: 1.5 }}>Team reviewed launch progress and finalized next milestones.</div>
-          </div>
-          <div style={{ fontSize: "10px", fontWeight: 700, color: theme.accent, marginBottom: "6px" }}>KEY POINTS</div>
-          <div style={{ fontSize: "10px", color: theme.textSecondary, marginBottom: "10px" }}>• Bot integration complete<br />• Transcript quality improved</div>
-          <div style={{ fontSize: "10px", fontWeight: 700, color: theme.accent, marginBottom: "6px" }}>ACTION ITEMS</div>
-          <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "10px", color: theme.textPrimary, marginBottom: "4px" }}>
-            <CheckSquare size={11} color={theme.success} /> Ship landing page
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "10px", color: theme.textPrimary }}>
-            <Square size={11} color={theme.textMuted} /> Review transcript edge cases
-          </div>
-        </div>
-
-        {/* Transcript */}
-        <div style={{ width: "260px", padding: "16px", display: "flex", flexDirection: "column" }}>
-          <div style={{ fontSize: "11px", fontWeight: 700, color: theme.textMuted, textTransform: "uppercase", marginBottom: "10px" }}>Transcript</div>
-          <div style={{ display: "flex", gap: "6px", marginBottom: "10px" }}>
-            <div style={{ width: "18px", height: "18px", borderRadius: "50%", backgroundColor: theme.accent, color: "#fff", fontSize: "8px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>MP</div>
-            <div>
-              <div style={{ fontSize: "9px", fontWeight: 700, color: theme.accent }}>Manya · 0:27</div>
-              <div style={{ fontSize: "9px", color: theme.textSecondary }}>Let's review this week's launch.</div>
-            </div>
-          </div>
-          <div style={{ display: "flex", gap: "6px", marginBottom: "14px" }}>
-            <div style={{ width: "18px", height: "18px", borderRadius: "50%", backgroundColor: "#0d9488", color: "#fff", fontSize: "8px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>VV</div>
-            <div>
-              <div style={{ fontSize: "9px", fontWeight: 700, color: "#0d9488" }}>Vedika · 0:35</div>
-              <div style={{ fontSize: "9px", color: theme.textSecondary }}>Sounds good, status looks solid.</div>
-            </div>
-          </div>
-          <div style={{ marginTop: "auto", borderTop: `1px solid ${theme.border}`, paddingTop: "10px", display: "flex", alignItems: "center", gap: "8px" }}>
-            <Play size={14} color={theme.accent} />
-            <div style={{ flex: 1, height: "3px", backgroundColor: theme.border, borderRadius: "2px" }}>
-              <div style={{ width: "40%", height: "100%", backgroundColor: theme.accent, borderRadius: "2px" }} />
-            </div>
-            <span style={{ fontSize: "9px", color: theme.textMuted }}>1:12</span>
-          </div>
-        </div>
+    <section
+      style={{
+        padding: "20px 24px 80px",
+        display: "flex",
+        justifyContent: "center",
+      }}
+    >
+      <div
+        style={{
+          maxWidth: "1000px",
+          width: "100%",
+          borderRadius: "16px",
+          overflow: "hidden",
+          border: `1px solid ${theme.border}`,
+          boxShadow: "0 24px 64px rgba(79,70,229,0.12)",
+        }}
+      >
+        <img
+          src={dashboardPreview}
+          alt="Conferio dashboard showing meeting transcript, AI summary, and audio playback"
+          style={{
+            width: "100%",
+            display: "block",
+          }}
+        />
       </div>
     </section>
   );
