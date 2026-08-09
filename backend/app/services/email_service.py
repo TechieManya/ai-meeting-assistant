@@ -1,5 +1,8 @@
 import httpx
-from app.config import EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, EMAILJS_PUBLIC_KEY, EMAILJS_PRIVATE_KEY
+from app.config import (
+    EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, EMAILJS_PUBLIC_KEY, EMAILJS_PRIVATE_KEY,
+    EMAILJS_RESET_TEMPLATE_ID,
+)
 
 EMAILJS_API_URL = "https://api.emailjs.com/api/v1.0/email/send"
 
@@ -118,4 +121,37 @@ def send_meeting_summary_email(
 
     except Exception as e:
         print(f"=== EMAIL FAILED: {e} ===")
+        return None
+
+
+def send_password_reset_email(to_email: str, reset_link: str):
+    try:
+        payload = {
+            "service_id": EMAILJS_SERVICE_ID,
+            "template_id": EMAILJS_RESET_TEMPLATE_ID,
+            "user_id": EMAILJS_PUBLIC_KEY,
+            "accessToken": EMAILJS_PRIVATE_KEY,
+            "template_params": {
+                "to_email": to_email,
+                "subject": "Reset your Conferio password",
+                "reset_link": reset_link,
+            },
+        }
+
+        response = httpx.post(
+            EMAILJS_API_URL,
+            json=payload,
+            timeout=30,
+        )
+
+        print("EmailJS status:", response.status_code)
+        print("EmailJS response:", response.text)
+
+        response.raise_for_status()
+
+        print(f"=== RESET EMAIL SENT via EmailJS: {to_email} ===")
+        return {"status": "sent"}
+
+    except Exception as e:
+        print(f"=== RESET EMAIL FAILED: {e} ===")
         return None

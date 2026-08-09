@@ -35,6 +35,26 @@ def get_user_by_id(user_id: str):
         return None
 
 
+# --- Password reset ---
+
+def set_reset_token(email: str, token: str, expires_at):
+    users_collection.update_one(
+        {"email": email.lower().strip()},
+        {"$set": {"reset_token": token, "reset_token_expires": expires_at}}
+    )
+
+
+def get_user_by_reset_token(token: str):
+    return users_collection.find_one({"reset_token": token})
+
+
+def update_password(user_id: str, new_hashed_password: str):
+    users_collection.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": {"hashed_password": new_hashed_password}, "$unset": {"reset_token": "", "reset_token_expires": ""}}
+    )
+
+
 # --- Meetings ---
 
 def create_pending_meeting(bot_id: str, user_id: str, meeting_url: str = None):

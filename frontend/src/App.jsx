@@ -1,9 +1,13 @@
 import { useState, useEffect, useRef } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Sidebar from "./components/Sidebar";
 import Dashboard from "./components/Dashboard";
 import MeetingJoinForm from "./components/MeetingJoinForm";
 import AuthScreen from "./components/AuthScreen";
+import Home from "./pages/Home";
+import MeetingPage from "./pages/MeetingPage";
+import ResetPassword from "./pages/ResetPassword";
 
 import { getAllMeetings } from "./services/api";
 import { AuthProvider, useAuth } from "./AuthContext";
@@ -26,7 +30,6 @@ function AppShell() {
     if (user) fetchHistory();
   }, [user]);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(e) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -98,10 +101,9 @@ function AppShell() {
         overflow: "hidden",
       }}
     >
-      {/* HEADER */}
       <header
         style={{
-          padding: "14px 32px", // slightly more vertical breathing room
+          padding: "14px 32px",
           borderBottom: "1px solid #e2e8f0",
           backgroundColor: "#ffffff",
           display: "flex",
@@ -111,9 +113,7 @@ function AppShell() {
           flexShrink: 0,
         }}
       >
-        {/* Left — Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          {/* Padded logo container */}
           <div
             style={{
               width: "40px",
@@ -124,7 +124,7 @@ function AppShell() {
               alignItems: "center",
               justifyContent: "center",
               fontSize: "18px",
-              padding: "8px", // internal breathing room around the icon
+              padding: "8px",
               boxSizing: "border-box",
             }}
           >
@@ -155,7 +155,6 @@ function AppShell() {
           </div>
         </div>
 
-        {/* Right — Welcome + Avatar */}
         <div
           ref={dropdownRef}
           style={{
@@ -163,7 +162,7 @@ function AppShell() {
             alignItems: "center",
             gap: "12px",
             position: "relative",
-            paddingRight: "4px", // keeps avatar from touching viewport edge
+            paddingRight: "4px",
           }}
         >
           <span
@@ -209,12 +208,11 @@ function AppShell() {
                 border: "1px solid #e2e8f0",
                 borderRadius: "12px",
                 boxShadow: "0 10px 30px rgba(0,0,0,0.10)",
-                padding: "16px", // proper padding all around the card
+                padding: "16px",
                 zIndex: 50,
                 boxSizing: "border-box",
               }}
             >
-              {/* User info */}
               <div style={{ marginBottom: "14px" }}>
                 <div
                   style={{
@@ -240,7 +238,6 @@ function AppShell() {
                 </div>
               </div>
 
-              {/* Divider */}
               <div
                 style={{
                   height: "1px",
@@ -249,7 +246,6 @@ function AppShell() {
                 }}
               />
 
-              {/* Log out button */}
               <button
                 onClick={logout}
                 style={{
@@ -279,7 +275,6 @@ function AppShell() {
         </div>
       </header>
 
-      {/* BODY */}
       <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
         <Sidebar
           meetings={meetings}
@@ -329,7 +324,14 @@ function AppShell() {
 function App() {
   return (
     <AuthProvider>
-      <AppShell />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/app" element={<AppShell />} />
+          <Route path="/meeting/:meetingId" element={<MeetingPage />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
+        </Routes>
+      </BrowserRouter>
     </AuthProvider>
   );
 }

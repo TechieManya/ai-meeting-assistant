@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from "react";
-import { loginUser, registerUser } from "./services/api";
+import { loginUser, registerUser, forgotPassword as forgotPasswordApi, resetPassword as resetPasswordApi } from "./services/api";
 
 const AuthContext = createContext(null);
 
@@ -38,6 +38,28 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const forgotPassword = async (email) => {
+    setError(null);
+    try {
+      await forgotPasswordApi(email);
+      return true;
+    } catch (err) {
+      setError(err.response?.data?.detail || "Something went wrong. Please try again.");
+      return false;
+    }
+  };
+
+  const resetPassword = async (token, newPassword) => {
+    setError(null);
+    try {
+      await resetPasswordApi(token, newPassword);
+      return true;
+    } catch (err) {
+      setError(err.response?.data?.detail || "Could not reset password");
+      return false;
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem("conferio_token");
     localStorage.removeItem("conferio_user");
@@ -45,7 +67,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, error }}>
+    <AuthContext.Provider value={{ user, login, register, logout, error, forgotPassword, resetPassword }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL  = "https://conferio-backend-s38i.onrender.com"
+const BASE_URL  =  "http://localhost:8000"
 
 ;
 
@@ -33,6 +33,23 @@ export const loginUser = async (email, password) => {
   const response = await apiClient.post("/api/v1/auth/login", { email, password });
   return response.data;
 };
+
+export const forgotPassword = async (email) => {
+  const response = await apiClient.post("/api/v1/auth/forgot-password", {
+    email,
+  });
+  return response.data;
+};
+
+export const resetPassword = async (token, newPassword) => {
+  const response = await apiClient.post("/api/v1/auth/reset-password", {
+    token,
+    new_password: newPassword,
+  });
+
+  return response.data;
+};
+
 
 export const transcribeAudio = async (file) => {
   const formData = new FormData();
