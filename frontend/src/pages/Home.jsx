@@ -226,9 +226,7 @@ function Footer() {
       <div style={{ fontSize: "13px", color: theme.textSecondary, marginBottom: "6px" }}>
         Conferio — Your Pensieve for Meetings
       </div>
-      <div style={{ fontSize: "12px", color: theme.textMuted }}>
-        An internship project by Manya &amp; Vedika.
-      </div>
+      
     </footer>
   );
 }
