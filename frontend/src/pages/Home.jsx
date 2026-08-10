@@ -8,7 +8,10 @@ import {
   PlayCircle,
   ArrowRight,
   Menu,
-  X
+  X,
+  Video,
+  AudioLines,
+  Sparkles,
 } from "lucide-react";
 import { useState } from "react";
 import theme from "../theme";
@@ -74,10 +77,44 @@ function Header() {
 function Hero() {
   return (
     <section style={{
-      padding: "80px 24px 60px", textAlign: "center", position: "relative", overflow: "hidden",
+      minHeight: "100vh",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+      padding: "24px",
+      textAlign: "center",
+      position: "relative",
+      overflow: "hidden",
+      boxSizing: "border-box",
       background: `radial-gradient(circle at 50% 0%, ${theme.accentSoft} 0%, transparent 60%)`,
     }}>
-      <h1 style={{ fontSize: "clamp(32px, 6vw, 56px)", fontWeight: 800, color: theme.textPrimary, margin: "0 0 20px", lineHeight: 1.1 }}>
+      <div style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "7px",
+        padding: "5px 13px",
+        borderRadius: "999px",
+        border: `1px solid ${theme.border}`,
+        backgroundColor: "rgba(255,255,255,0.6)",
+        fontSize: "12px",
+        fontWeight: 600,
+        letterSpacing: "0.08em",
+        color: theme.accent,
+        marginBottom: "28px",
+      }}>
+        <Sparkles size={12} strokeWidth={2} />
+        MEETINGS, MADE CLEAR
+      </div>
+
+      <h1 style={{
+        fontSize: "clamp(40px, 7vw, 68px)",
+        fontWeight: 800,
+        color: theme.textPrimary,
+        margin: "0 0 24px",
+        lineHeight: 1.08,
+        letterSpacing: "-0.02em",
+      }}>
         Your{" "}
         <span style={{
           background: `linear-gradient(135deg, ${theme.accent}, #7c3aed)`,
@@ -85,26 +122,69 @@ function Hero() {
         }}>Pensieve</span>{" "}
         for meetings
       </h1>
-      <p style={{ fontSize: "17px", color: theme.textSecondary, maxWidth: "560px", margin: "0 auto 32px", lineHeight: 1.7 }}>
+      <p style={{
+        fontSize: "18px",
+        color: theme.textSecondary,
+        maxWidth: "600px",
+        margin: "0 auto 40px",
+        lineHeight: 1.7,
+      }}>
         Conferio joins your calls, records them, transcribes every speaker separately,
         and hands you a clean summary with key points and action items the moment it ends.
       </p>
-      <div style={{ display: "flex", gap: "14px", justifyContent: "center", flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: "14px", justifyContent: "center", flexWrap: "wrap", marginBottom: "56px" }}>
         <Link to="/app" style={{
-          padding: "13px 26px", borderRadius: "10px", fontSize: "15px", fontWeight: 600,
+          padding: "15px 30px", borderRadius: "10px", fontSize: "16px", fontWeight: 600,
           color: "#ffffff", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "8px",
           background: `linear-gradient(135deg, ${theme.accent}, #7c3aed)`,
           boxShadow: "0 8px 24px rgba(79,70,229,0.25)",
         }}>
-          Get Started <ArrowRight size={16} />
+          Get Started <ArrowRight size={18} />
         </Link>
         <a href="#features" style={{
-          padding: "13px 26px", borderRadius: "10px", fontSize: "15px", fontWeight: 600,
+          padding: "15px 30px", borderRadius: "10px", fontSize: "16px", fontWeight: 600,
           color: theme.textPrimary, textDecoration: "none",
           border: `1px solid ${theme.border}`, backgroundColor: theme.surface,
         }}>
           See how it works
         </a>
+      </div>
+
+      <div style={{
+        display: "flex",
+        gap: "36px",
+        flexWrap: "wrap",
+        justifyContent: "center",
+        color: theme.textMuted,
+        fontSize: "13.5px",
+        fontWeight: 450,
+      }}>
+        {[
+          { icon: Video, label: "Google Meet" },
+          { icon: AudioLines, label: "Speaker-aware transcripts" },
+          { icon: Sparkles, label: "Instant AI summaries" },
+        ].map(({ icon: Icon, label }) => (
+          <div key={label} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <Icon size={14} strokeWidth={1.75} color={theme.accent} />
+            {label}
+          </div>
+        ))}
+      </div>
+
+      <div style={{
+        position: "absolute",
+        bottom: "32px",
+        left: "50%",
+        transform: "translateX(-50%)",
+        fontSize: "12px",
+        color: theme.textMuted,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: "6px",
+      }}>
+        <span>See it in action</span>
+        <div style={{ fontSize: "16px" }}>↓</div>
       </div>
     </section>
   );
@@ -117,23 +197,59 @@ function DashboardMockup() {
         padding: "20px 24px 80px",
         display: "flex",
         justifyContent: "center",
+        width: "100%",
+        boxSizing: "border-box",
+        overflow: "hidden",
       }}
     >
       <div
         style={{
-          maxWidth: "1000px",
+          maxWidth: "900px",
           width: "100%",
-          borderRadius: "16px",
+          borderRadius: "14px",
           overflow: "hidden",
           border: `1px solid ${theme.border}`,
-          boxShadow: "0 24px 64px rgba(79,70,229,0.12)",
+          boxShadow: "0 24px 64px rgba(79,70,229,0.14)",
+          backgroundColor: theme.surface,
+          boxSizing: "border-box",
         }}
       >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+            padding: "10px 14px",
+            borderBottom: `1px solid ${theme.border}`,
+            backgroundColor: theme.surfaceHover,
+          }}
+        >
+          <span style={{ width: "10px", height: "10px", borderRadius: "50%", backgroundColor: "#f87171" }} />
+          <span style={{ width: "10px", height: "10px", borderRadius: "50%", backgroundColor: "#fbbf24" }} />
+          <span style={{ width: "10px", height: "10px", borderRadius: "50%", backgroundColor: "#34d399" }} />
+          <div
+            style={{
+              marginLeft: "10px",
+              flex: 1,
+              maxWidth: "260px",
+              fontSize: "11px",
+              color: theme.textMuted,
+              backgroundColor: theme.surface,
+              borderRadius: "6px",
+              padding: "3px 10px",
+              border: `1px solid ${theme.border}`,
+            }}
+          >
+            conferio.vercel.app
+          </div>
+        </div>
+
         <img
           src={dashboardPreview}
           alt="Conferio dashboard showing meeting transcript, AI summary, and audio playback"
           style={{
             width: "100%",
+            height: "auto",
             display: "block",
           }}
         />
