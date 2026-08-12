@@ -31,7 +31,15 @@ function MeetingPage() {
           setError("This meeting isn't ready yet.");
         } else {
           setMeeting(data);
-          setSummary(data.summary || null);
+          if (data.summary) {
+            setSummary(data.summary);
+          } else {
+            setSummaryLoading(true);
+            generateSummary(meetingId)
+              .then((result) => setSummary(result.summary))
+              .catch(() => {})
+              .finally(() => setSummaryLoading(false));
+          }
         }
       })
       .catch(() => setError("Couldn't load this meeting. It may not exist or you may not have access."))
