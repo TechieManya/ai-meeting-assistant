@@ -346,10 +346,13 @@ function Footer() {
     </footer>
   );
 }
-
 function Home() {
   return (
-    <div style={{ backgroundColor: theme.bg, minHeight: "100vh" }}>
+    <div style={{
+      backgroundColor: theme.bg,
+      minHeight: "100vh",
+      fontFamily: "'Manrope', -apple-system, BlinkMacSystemFont, sans-serif",
+    }}>
       <Header />
       <Hero />
       <DashboardMockup />
@@ -360,5 +363,4 @@ function Home() {
     </div>
   );
 }
-
 export default Home;
