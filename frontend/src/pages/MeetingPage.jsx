@@ -64,7 +64,11 @@ function MeetingPage() {
 
   if (loading) {
     return (
-      <div style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", color: theme.textSecondary }}>
+      <div style={{
+        height: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
+        color: theme.textSecondary,
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+      }}>
         Loading meeting...
       </div>
     );
@@ -72,7 +76,10 @@ function MeetingPage() {
 
   if (error) {
     return (
-      <div style={{ height: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "12px" }}>
+      <div style={{
+        height: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "12px",
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+      }}>
         <div style={{ fontSize: "15px", color: theme.textPrimary, fontWeight: 600 }}>{error}</div>
         <button onClick={() => navigate("/app")} style={{
           padding: "8px 16px", borderRadius: "8px", border: `1px solid ${theme.border}`,
@@ -85,7 +92,13 @@ function MeetingPage() {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh", backgroundColor: theme.bg }}>
+    <div style={{
+      display: "flex",
+      flexDirection: "column",
+      height: "100vh",
+      backgroundColor: theme.bg,
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    }}>
       <MeetingHeader meeting={meeting} />
       <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
         <div style={{ flex: "0 0 60%", overflow: "auto", padding: "24px", borderRight: `1px solid ${theme.border}` }}>
