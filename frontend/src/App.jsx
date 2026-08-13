@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useParams, useNavigate } from "react-router-dom";
 
 import Sidebar from "./components/Sidebar";
 import Dashboard from "./components/Dashboard";
@@ -15,6 +15,8 @@ import theme from "./theme";
 
 function AppShell() {
   const { user, logout } = useAuth();
+  const { botId } = useParams();
+  const navigate = useNavigate();
 
   const [meetings, setMeetings] = useState([]);
   const [selectedMeeting, setSelectedMeeting] = useState(null);
@@ -29,6 +31,23 @@ function AppShell() {
   useEffect(() => {
     if (user) fetchHistory();
   }, [user]);
+
+  // Sync state with the URL — this is what gives each meeting its own address
+  useEffect(() => {
+    if (!botId) {
+      setSelectedMeeting(null);
+      if (mode !== "live") setMode("welcome");
+      return;
+    }
+    const found = meetings.find((m) => m.bot_id === botId);
+    if (found) {
+      setSelectedMeeting(found);
+      setMode("history");
+      setShowJoinForm(false);
+    } else if (botId === activeBotId) {
+      setMode("live");
+    }
+  }, [botId, meetings]);
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -56,8 +75,7 @@ function AppShell() {
   };
 
   const handleSelectMeeting = (meeting) => {
-    setSelectedMeeting(meeting);
-    setMode("history");
+    navigate(`/app/meeting/${meeting.bot_id}`);
     setShowJoinForm(false);
   };
 
@@ -67,10 +85,11 @@ function AppShell() {
     setMode("new");
   };
 
-  const handleBotJoined = (botId) => {
-    setActiveBotId(botId);
+  const handleBotJoined = (newBotId) => {
+    setActiveBotId(newBotId);
     setMode("live");
     setShowJoinForm(false);
+    navigate(`/app/meeting/${newBotId}`);
   };
 
   const handleTranscriptReady = () => {
@@ -328,6 +347,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/app" element={<AppShell />} />
+          <Route path="/app/meeting/:botId" element={<AppShell />} />
           <Route path="/meeting/:meetingId" element={<MeetingPage />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
         </Routes>
