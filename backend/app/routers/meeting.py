@@ -181,7 +181,8 @@ def fetch_transcript(bot_id: str, current_user: dict = Depends(get_current_user)
         "bot_id": result["bot_id"],
         "participants": result.get("participants", []),
         "audio_url": result.get("audio_url"),
-        "transcript": result["transcript"]
+        "transcript": result["transcript"],
+        "summary": result.get("summary"),
     }
 
 
