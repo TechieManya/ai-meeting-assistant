@@ -66,7 +66,7 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
-  return (
+  return (  
     <AuthContext.Provider value={{ user, login, register, logout, error, forgotPassword, resetPassword }}>
       {children}
     </AuthContext.Provider>
