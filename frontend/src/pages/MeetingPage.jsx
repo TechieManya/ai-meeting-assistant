@@ -50,16 +50,6 @@ function MeetingPage() {
       .catch(() => setAudioUrl(null));
   }, [meetingId, user]);
 
-  const handleGenerateSummary = async () => {
-    setSummaryLoading(true);
-    try {
-      const data = await generateSummary(meetingId);
-      setSummary(data.summary);
-    } finally {
-      setSummaryLoading(false);
-    }
-  };
-
   if (!user) return <AuthScreen />;
 
   if (loading) {
@@ -102,7 +92,7 @@ function MeetingPage() {
       <MeetingHeader meeting={meeting} />
       <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
         <div style={{ flex: "0 0 60%", overflow: "auto", padding: "24px", borderRight: `1px solid ${theme.border}` }}>
-          <SummaryPanel summary={summary} summaryLoading={summaryLoading} onGenerate={handleGenerateSummary} botId={meetingId} />
+          <SummaryPanel summary={summary} summaryLoading={summaryLoading} botId={meetingId} readOnly={true} />
         </div>
         <div style={{ flex: "0 0 40%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
           <div style={{ flex: 1, overflow: "auto", padding: "24px" }}>

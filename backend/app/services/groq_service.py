@@ -47,7 +47,7 @@ ACTION ITEMS:
 """
 
     response = client.chat.completions.create(
-        model="llama-3.1-8b-instant",
+        model="openai/gpt-oss-20b",
         messages=[
             {
                 "role": "system",
@@ -58,7 +58,7 @@ ACTION ITEMS:
                 "content": prompt
             }
         ],
-        temperature=0.3,  
+        temperature=0.3,
         max_tokens=1024
     )
 

@@ -23,7 +23,7 @@ function HoverCard({ style, children }) {
   );
 }
 
-function SummaryPanel({ summary, summaryLoading, onGenerate, botId }) {
+function SummaryPanel({ summary, summaryLoading, onGenerate, botId, readOnly = false }) {
   const [completedItems, setCompletedItems] = useState({});
   const [sendingReport, setSendingReport] = useState(false);
   const [sendStatus, setSendStatus] = useState(null);
@@ -122,21 +122,42 @@ function SummaryPanel({ summary, summaryLoading, onGenerate, botId }) {
           <Sparkles size={13} /> AI Summary
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            gap: "10px",
-          }}
-        >
-          {summary && (
+        {!readOnly && (
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: "10px",
+            }}
+          >
+            {summary && (
+              <button
+                onClick={handleSendReport}
+                disabled={sendingReport}
+                style={pillButtonStyle(sendingReport)}
+                onMouseEnter={(e) => {
+                  if (!sendingReport) {
+                    e.currentTarget.style.backgroundColor = "#f8fafc";
+                    e.currentTarget.style.boxShadow = "0 2px 6px rgba(0,0,0,0.08)";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "#ffffff";
+                  e.currentTarget.style.boxShadow = "0 1px 2px rgba(0,0,0,0.06)";
+                }}
+              >
+                <Mail size={14} />
+                {sendingReport ? "Sending..." : "Send Report"}
+              </button>
+            )}
+
             <button
-              onClick={handleSendReport}
-              disabled={sendingReport}
-              style={pillButtonStyle(sendingReport)}
+              onClick={onGenerate}
+              disabled={summaryLoading}
+              style={pillButtonStyle(summaryLoading)}
               onMouseEnter={(e) => {
-                if (!sendingReport) {
+                if (!summaryLoading) {
                   e.currentTarget.style.backgroundColor = "#f8fafc";
                   e.currentTarget.style.boxShadow = "0 2px 6px rgba(0,0,0,0.08)";
                 }
@@ -146,30 +167,11 @@ function SummaryPanel({ summary, summaryLoading, onGenerate, botId }) {
                 e.currentTarget.style.boxShadow = "0 1px 2px rgba(0,0,0,0.06)";
               }}
             >
-              <Mail size={14} />
-              {sendingReport ? "Sending..." : "Send Report"}
+              <RefreshCw size={14} className={summaryLoading ? "animate-spin" : ""} />
+              {summaryLoading ? "Generating..." : summary ? "Regenerate" : "Generate"}
             </button>
-          )}
-
-          <button
-            onClick={onGenerate}
-            disabled={summaryLoading}
-            style={pillButtonStyle(summaryLoading)}
-            onMouseEnter={(e) => {
-              if (!summaryLoading) {
-                e.currentTarget.style.backgroundColor = "#f8fafc";
-                e.currentTarget.style.boxShadow = "0 2px 6px rgba(0,0,0,0.08)";
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "#ffffff";
-              e.currentTarget.style.boxShadow = "0 1px 2px rgba(0,0,0,0.06)";
-            }}
-          >
-            <RefreshCw size={14} className={summaryLoading ? "animate-spin" : ""} />
-            {summaryLoading ? "Generating..." : summary ? "Regenerate" : "Generate"}
-          </button>
-        </div>
+          </div>
+        )}
       </div>
 
       {sendStatus === "sent" && (
@@ -316,7 +318,7 @@ function SummaryPanel({ summary, summaryLoading, onGenerate, botId }) {
                     return (
                       <li
                         key={i}
-                        onClick={() => toggleActionItem(i)}
+                        onClick={() => !readOnly && toggleActionItem(i)}
                         style={{
                           fontSize: "13px",
                           color: isDone ? "#94a3b8" : "#0f172a",
@@ -325,7 +327,7 @@ function SummaryPanel({ summary, summaryLoading, onGenerate, botId }) {
                           display: "flex",
                           gap: "10px",
                           alignItems: "flex-start",
-                          cursor: "pointer",
+                          cursor: readOnly ? "default" : "pointer",
                           userSelect: "none",
                           transition: "color 0.15s ease",
                           minWidth: 0
