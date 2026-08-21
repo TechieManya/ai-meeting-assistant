@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FileText, ListChecks, CheckSquare, Square, RefreshCw, Sparkles, Mail } from "lucide-react";
+import { FileText, ListChecks, CheckSquare, Square, RefreshCw, Sparkles, Mail, HelpCircle } from "lucide-react";
 import { sendMeetingReport } from "../services/api";
 
 function HoverCard({ style, children }) {
@@ -318,7 +318,7 @@ function SummaryPanel({ summary, summaryLoading, onGenerate, botId, readOnly = f
                     return (
                       <li
                         key={i}
-                        onClick={() => !readOnly && toggleActionItem(i)}
+                        onClick={() => toggleActionItem(i)}
                         style={{
                           fontSize: "13px",
                           color: isDone ? "#94a3b8" : "#0f172a",
@@ -327,7 +327,7 @@ function SummaryPanel({ summary, summaryLoading, onGenerate, botId, readOnly = f
                           display: "flex",
                           gap: "10px",
                           alignItems: "flex-start",
-                          cursor: readOnly ? "default" : "pointer",
+                          cursor: "pointer",
                           userSelect: "none",
                           transition: "color 0.15s ease",
                           minWidth: 0
@@ -357,6 +357,64 @@ function SummaryPanel({ summary, summaryLoading, onGenerate, botId, readOnly = f
                       </li>
                     );
                   })}
+                </ul>
+              </HoverCard>
+            )}
+
+            {summary.unresolved_questions?.length > 0 && (
+              <HoverCard
+                style={{
+                  ...cardStyle,
+                  display: "flex",
+                  flexDirection: "column",
+                  height: "100%",
+                }}
+              >
+                <div style={eyebrowStyle}>
+                  <HelpCircle size={13} /> Unresolved Questions
+                </div>
+                <ul
+                  style={{
+                    margin: 0,
+                    padding: 0,
+                    listStyle: "none",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "12px",
+                    flex: 1,
+                  }}
+                >
+                  {summary.unresolved_questions.map((question, i) => (
+                    <li
+                      key={i}
+                      style={{
+                        fontSize: "13px",
+                        color: "#0f172a",
+                        lineHeight: 1.55,
+                        display: "flex",
+                        gap: "10px",
+                        minWidth: 0
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: "13px",
+                          lineHeight: 1,
+                          flexShrink: 0,
+                        }}
+                      >
+                        ❓
+                      </span>
+                      <span
+                        style={{
+                          overflowWrap: "anywhere",
+                          wordBreak: "break-word",
+                        }}
+                      >
+                        {question}
+                      </span>
+                    </li>
+                  ))}
                 </ul>
               </HoverCard>
             )}

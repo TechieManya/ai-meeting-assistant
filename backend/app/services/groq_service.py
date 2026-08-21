@@ -101,3 +101,110 @@ def parse_summary_response(text: str) -> dict:
             result["action_items"].append(line[1:].strip())
 
     return result
+
+
+# ---------------------------------------------------------------------------
+# NEW — Unresolved Questions feature
+# Separate function, separate prompt, separate parser.
+# ---------------------------------------------------------------------------
+
+def generate_unresolved_questions(transcript: list) -> dict:
+    """
+    Identifies questions or decisions from the meeting that remain
+    unanswered, ambiguous, or deferred.
+    """
+    transcript_text = format_transcript_for_prompt(transcript)
+
+    prompt = f"""You are an AI meeting assistant analyzing a meeting transcript.
+
+Your task is to identify questions, decisions, or discussion points that
+remain UNRESOLVED at the end of the meeting.
+
+TRANSCRIPT:
+{transcript_text}
+
+An unresolved item is something that:
+- was asked but never answered,
+- received an uncertain or incomplete answer,
+- was deferred for later,
+- requires a decision that was not made,
+- or has unclear ownership/responsibility.
+
+Do NOT include:
+- Questions that were clearly answered.
+- Tasks that were clearly assigned and accepted.
+- Rhetorical questions.
+- General discussion points that were successfully resolved.
+
+Return ONLY the unresolved questions/items.
+
+If there are none, return:
+UNRESOLVED QUESTIONS:
+None
+
+Otherwise use exactly this format:
+
+UNRESOLVED QUESTIONS:
+- [unresolved question or issue]
+- [unresolved question or issue]
+"""
+
+    response = client.chat.completions.create(
+        model="openai/gpt-oss-20b",
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    "You identify unresolved questions and decisions "
+                    "from meeting transcripts accurately and conservatively."
+                )
+            },
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ],
+        temperature=0.2,
+        max_tokens=512
+    )
+
+    raw_text = response.choices[0].message.content or ""
+
+    print("UNRESOLVED QUESTIONS RAW RESPONSE:")
+    print(raw_text)
+
+    return parse_unresolved_questions_response(raw_text)
+
+
+def parse_unresolved_questions_response(text: str) -> dict:
+    """
+    Parses the unresolved questions section from the LLM response.
+    """
+    result = {
+        "unresolved_questions": []
+    }
+
+    lines = text.strip().split("\n")
+    inside_section = False
+
+    for line in lines:
+        line = line.strip()
+
+        if not line:
+            continue
+
+        if line.upper().startswith("UNRESOLVED QUESTIONS"):
+            inside_section = True
+            continue
+
+        if inside_section:
+            if line.lower() == "none":
+                continue
+
+            if line.startswith("-"):
+                question = line[1:].strip()
+
+                if question:
+                    result["unresolved_questions"].append(question)
+
+    return result

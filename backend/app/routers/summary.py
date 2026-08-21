@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from app.services.groq_service import generate_summary
+from app.services.groq_service import generate_summary, generate_unresolved_questions
 from app.services.mongo_service import get_transcript_by_bot_id, save_summary
 
 router = APIRouter()
@@ -37,7 +37,17 @@ def summarize_meeting(bot_id: str):
             status_code=500,
             detail=f"Groq API error: {str(e)}"
         )
-    
+
+    # --- NEW: Unresolved Questions (additive, non-breaking) ---
+    # Runs as its own call, separate from generate_summary above.
+    # If it fails for any reason, we don't want to break the existing
+    # summary flow — so we fall back to an empty list instead of raising.
+    try:
+        unresolved = generate_unresolved_questions(transcript)
+        summary["unresolved_questions"] = unresolved.get("unresolved_questions", [])
+    except Exception:
+        summary["unresolved_questions"] = []
+    # --- END NEW ---
 
     save_summary(bot_id, summary)
     
